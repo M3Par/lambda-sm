@@ -1,0 +1,60 @@
+# Nome do grupo de lambdas ou Lambda em caso de compor apenas uma. Esta chave-valor dará o nome para a Stack do CloudFormation
+service: get-profile
+
+frameworkVersion: '3'
+
+provider: # Usado para definições padrões
+  apiGateway:
+    restApiId: t4arkza3cd
+    restApiRootResourceId: hy4baf14k4
+    apiKeySourceType: HEADER
+  name: aws
+  runtime: python3.10
+  stage: dev
+  region: us-east-1
+
+#plugins:
+# - serverless-python-requirements
+#custom:
+#  pythonRequirements:
+#    dockerizePip: false
+#    zip: true
+#    useDownloadCache: false
+#    useStaticCache: false
+
+package:
+  individually: true
+
+functions:
+
+  lambda_get_profile:
+    name: get_profile
+    handler: src/lambda_function.lambda_handler
+    description: Lambda get_profile
+    runtime: python3.12 # Se não setado, usa a versão definida no provider
+    timeout: 10 
+    memorySize: 128
+    vpc: # Pode ser definido a nível de provider
+      securityGroupIds:
+        - sg-0c1b7c4045d3ca831
+      subnetIds:
+        - subnet-03487ba4ce2b221e0
+        - subnet-00cbf78ab66e6a9f5
+    package:
+      patterns:
+        - 'services/portal/session/get_profile/**'
+        - '!serverless.yml'
+        - 'libs/**'
+    environment:
+      CHAVE: valor
+    layers:
+      - arn:aws:lambda:us-east-1:009160056575:layer:Layer_Dependency_Session:1
+    events:
+      - http:
+          path: profile
+          method: get
+          cors: true
+      #- http:
+      #    path: profile2
+      #    method: post
+      #    cors: true
